@@ -1,24 +1,27 @@
 # AWS Flipkart E-Commerce Application with RDS
 
-A hands-on AWS deployment project for an e-commerce application using Amazon EC2, Amazon RDS (MySQL), Nginx, Application Load Balancer (ALB), Target Groups, ACM, Route 53, HTTPS, Security Groups, and email OTP functionality.
+A hands-on AWS deployment project for an e-commerce application using Amazon EC2, Amazon RDS (MySQL), Nginx, Application Load Balancer (ALB), Target Groups, ACM, Route 53, Security Groups, HTTPS, and email OTP functionality.
 
-> **Reference repository:** The application code used for this learning project is based on the public repository:
+> **Reference:** The application code used for this learning project is based on the public repository:
 > https://github.com/CloudTechDevOps/aws-ecommerce-Application-Multiple-services
-
-This repository documents the deployment process, AWS configuration, testing, and supporting screenshots.
+>
+> This repository documents my deployment process, AWS configuration, testing, and screenshots.
 
 ---
 
 ## Project Overview
 
-The objective of this project was to deploy an e-commerce application on AWS, configure the application servers, connect the backend to Amazon RDS MySQL, expose the application through an Application Load Balancer, and secure access using HTTPS.
+The goal of this project was to deploy an e-commerce application on AWS and connect the application backend to an Amazon RDS MySQL database.
 
-### AWS Services & Technologies
+### AWS Services & Technologies Used
 
 - Amazon EC2
 - Amazon RDS MySQL
 - Amazon VPC
+- Public and Private Subnets
 - Security Groups
+- Internet Gateway
+- Route Tables
 - Nginx
 - Application Load Balancer
 - Target Groups
@@ -27,17 +30,17 @@ The objective of this project was to deploy an e-commerce application on AWS, co
 - HTTPS
 - Node.js
 - MySQL
-- Linux
+- Email OTP functionality
 
 ---
 
-## Project Architecture
+## Architecture
 
 ```text
                          Internet
                             |
                             v
-                        Route 53
+                       Route 53
                             |
                             v
                     HTTPS / ACM
@@ -45,48 +48,223 @@ The objective of this project was to deploy an e-commerce application on AWS, co
                             v
                 Application Load Balancer
                             |
-                     Target Group
-                            |
-                  +---------+---------+
-                  |                   |
-                  v                   v
-             EC2 Server          EC2 Server
-             Frontend             Backend/API
-                                      |
-                                      v
-                                Amazon RDS
-                                 MySQL DB
+                    +-------+-------+
+                    |               |
+                    v               v
+               Target Group    Target Group
+                    |               |
+                    v               v
+               EC2 Server      EC2 Server
+               Frontend        Backend/API
+                                    |
+                                    v
+                              Amazon RDS
+                               MySQL DB
 ```
 
 ---
 
-# 1. EC2 Servers
+# 1. AWS VPC Configuration
+
+The application infrastructure was created inside an Amazon VPC.
+
+Example VPC CIDR:
+
+```text
+10.0.0.0/16
+```
+
+The VPC provides the isolated networking environment required for the EC2 instances and database.
+
+### Screenshot
+
+![VPC Configuration](docs/screenshots/VPC.png)
+
+---
+
+# 2. Subnet Configuration
+
+Subnets were created inside the VPC to organize the application infrastructure.
+
+Example structure:
+
+```text
+VPC
+|
++-- Public Subnet
+|
++-- Public Subnet
+|
++-- Private Subnet
+|
++-- Private Subnet
+```
+
+### Screenshot
+
+![Subnet Configuration](docs/screenshots/SUBNETS.png)
+
+---
+
+# 3. Internet Gateway
+
+An Internet Gateway was attached to the VPC to provide internet connectivity for resources in public subnets.
+
+### Screenshot
+
+![Internet Gateway](docs/screenshots/INTERNET_GATEWAY.png)
+
+---
+
+# 4. Route Table
+
+A route table was configured for the public subnet.
+
+Example:
+
+```text
+Destination     Target
+
+0.0.0.0/0       Internet Gateway
+```
+
+### Screenshot
+
+![Route Table](docs/screenshots/ROUTE_TABLE.png)
+
+---
+
+# 5. Security Groups
+
+Security Groups were configured to control inbound and outbound traffic.
+
+Typical ports used in this project:
+
+```text
+22    -> SSH
+80    -> HTTP
+443   -> HTTPS
+3306  -> MySQL
+```
+
+The database security group was configured to allow MySQL traffic from the required application/server security group.
+
+### Screenshot
+
+![Security Groups](docs/screenshots/SECURITY_GROUPS.png)
+
+---
+
+# 6. EC2 Instances
 
 EC2 instances were launched for the application components.
 
-The servers were used for frontend/backend deployment, Nginx configuration, and application testing.
+The servers were used for the frontend/backend application deployment and Nginx configuration.
 
 ### Screenshot
 
-![EC2 Servers](docs/screenshots/EC2_SERVERS.jpeg)
+![EC2 Servers](docs/screenshots/EC2_SERVERS.png)
 
 ---
 
-# 2. Frontend Server
+# 7. Connect to EC2
 
-The frontend application was deployed and verified on the EC2 environment.
+After launching the EC2 instance, I connected to the server using SSH.
+
+Example:
+
+```bash
+ssh -i your-key.pem ec2-user@YOUR_EC2_PUBLIC_IP
+```
+
+Private keys and sensitive credentials are not included in this repository.
 
 ### Screenshot
 
-![Frontend Server Running](docs/screenshots/FRONTEND_SERVER_RUNNING.jpeg)
+![EC2 Connection](docs/screenshots/EC2_CONNECTION.png)
 
 ---
 
-# 3. Backend Server
+# 8. Install Node.js and Required Packages
 
-The backend application was deployed on the backend server.
+The required packages were installed on the application server.
 
-Example commands used during deployment:
+```bash
+sudo yum update -y
+sudo yum install git -y
+sudo yum install nodejs npm -y
+```
+
+Verify:
+
+```bash
+node --version
+npm --version
+```
+
+### Screenshot
+
+![Node Installation](docs/screenshots/NODE_INSTALLATION.png)
+
+---
+
+# 9. Install and Configure Nginx
+
+Nginx was installed and configured as the web server/reverse proxy.
+
+Install Nginx:
+
+```bash
+sudo yum install nginx -y
+```
+
+Start Nginx:
+
+```bash
+sudo systemctl start nginx
+```
+
+Enable Nginx:
+
+```bash
+sudo systemctl enable nginx
+```
+
+Check status:
+
+```bash
+sudo systemctl status nginx
+```
+
+### Screenshot
+
+![Nginx Running](docs/screenshots/NGINX_RUNNING.png)
+
+---
+
+# 10. Frontend Application Deployment
+
+The frontend application was deployed on the EC2 server.
+
+Example:
+
+```bash
+git clone <repository-url>
+cd <application-directory>
+npm install
+```
+
+The application was then configured and started according to the project requirements.
+
+### Screenshot
+
+![Frontend Server Running](docs/screenshots/FRONTEND_SERVER_RUNNING.png)
+
+---
+
+# 11. Backend Application Deployment
+
+The backend application was deployed on the backend EC2 server.
 
 ```bash
 cd backend
@@ -96,23 +274,23 @@ npm start
 
 ### Screenshot
 
-![Backend Server Running](docs/screenshots/BACKEND_SERVER_RUNNING.jpeg)
+![Backend Server Running](docs/screenshots/BACKEND_SERVER_RUNNING.png)
 
 ---
 
-# 4. API Verification
+# 12. API Verification
 
-After starting the backend, the API was tested to verify that the backend service was running successfully.
+After starting the backend application, the API endpoint was tested to verify that the backend was responding successfully.
 
 ### Screenshot
 
-![API Running Successfully](docs/screenshots/API_RUNNING_SUCCESFULLY_MESSAGE.jpeg)
+![API Running Successfully](docs/screenshots/API_RUNNING_SUCCESFULLY_MESSAGE.png)
 
 ---
 
-# 5. Amazon RDS MySQL Database
+# 13. Amazon RDS MySQL
 
-Amazon RDS was configured as the managed MySQL database for the application.
+Amazon RDS was created as the managed MySQL database for the application.
 
 ```text
 Database Engine: MySQL
@@ -121,144 +299,252 @@ Port: 3306
 
 ### Screenshot
 
-![RDS Database](docs/screenshots/DATABASE.jpeg)
+![RDS Database](docs/screenshots/DATABASE.png)
 
 ---
 
-# 6. RDS DB Subnet Group
+# 14. DB Subnet Group
 
-A DB Subnet Group was configured for the RDS database.
+A DB Subnet Group was configured for the RDS database using the required subnets.
 
 ### Screenshot
 
-![DB Subnet Group](docs/screenshots/DB-SUBNET-GROUP.jpeg)
+![DB Subnet Group](docs/screenshots/DB-SUBNET-GROUP.png)
 
 ---
 
-# 7. Application Load Balancer
+# 15. RDS Security Group
 
-An Application Load Balancer was configured to receive incoming application traffic and forward requests to the target group.
+The RDS security group was configured so that the application server could communicate with MySQL on port 3306.
 
 ```text
-Internet
-   |
-   v
-Application Load Balancer
-   |
-   v
-Target Group
-   |
-   +---- EC2
-   |
-   +---- EC2
+Application Server
+        |
+        | TCP 3306
+        v
+    RDS MySQL
 ```
 
 ### Screenshot
 
-![Application Load Balancer](docs/screenshots/UPDATED_ALB_WITH_HTTPS.jpeg)
+![RDS Security Group](docs/screenshots/RDS_SECURITY_GROUP.png)
 
 ---
 
-# 8. Target Group
+# 16. Connect Backend to RDS
 
-A Target Group was configured for the EC2 application servers.
+The backend application was configured using the RDS MySQL endpoint.
 
-The target group allows the Application Load Balancer to route traffic to registered healthy instances.
+Example:
+
+```text
+DB_HOST=your-rds-endpoint
+DB_PORT=3306
+DB_USER=your-db-user
+DB_PASSWORD=your-db-password
+DB_NAME=your-database
+```
+
+Actual database credentials are not included in this repository.
 
 ### Screenshot
 
-![Target Group](docs/screenshots/TARGET_GROUP.jpeg)
+![Database Connection](docs/screenshots/DATABASE_CONNECTION.png)
 
 ---
 
-# 9. HTTPS with ACM
+# 17. Application Load Balancer
 
-AWS Certificate Manager was used to configure an SSL/TLS certificate for HTTPS access.
+An Application Load Balancer was created to receive incoming application traffic and forward it to the configured target groups.
+
+```text
+             Application Load Balancer
+                         |
+                 +-------+-------+
+                 |               |
+                 v               v
+              EC2-1           EC2-2
+```
+
+### Screenshot
+
+![Application Load Balancer](docs/screenshots/ALB.png)
+
+---
+
+# 18. Target Groups
+
+Target Groups were created for the EC2 instances.
+
+The ALB forwards requests to healthy registered targets.
+
+```text
+ALB
+ |
+ v
+Target Group
+ |
+ +-- EC2 Instance 1
+ |
+ +-- EC2 Instance 2
+```
+
+### Screenshot
+
+![Target Group](docs/screenshots/TARGET_GROUP.png)
+
+---
+
+# 19. ALB Listener
+
+The Application Load Balancer listener was configured for application traffic.
+
+Typical configuration:
+
+```text
+HTTP  -> Port 80
+HTTPS -> Port 443
+```
+
+### Screenshot
+
+![ALB Listener](docs/screenshots/ALB_LISTENER.png)
+
+---
+
+# 20. AWS Certificate Manager
+
+AWS Certificate Manager was used to create an SSL/TLS certificate for the domain.
 
 The certificate was associated with the HTTPS listener of the Application Load Balancer.
 
 ### Screenshot
 
-![Updated ALB with HTTPS](docs/screenshots/UPDATED_ALB_WITH_HTTPS.jpeg)
+![ACM Certificate](docs/screenshots/ACM_CERTIFICATE.png)
 
 ---
 
-# 10. Route 53
+# 21. Route 53
 
-Amazon Route 53 was configured to route the application domain to the Application Load Balancer.
+Amazon Route 53 was configured for DNS management.
+
+The domain was configured to route traffic to the Application Load Balancer.
 
 ```text
 User
+ |
+ v
+Domain
  |
  v
 Route 53
  |
  v
 Application Load Balancer
- |
- v
-Application Servers
 ```
 
 ### Screenshot
 
-![Route 53 Website](docs/screenshots/ROUTE53_WEBSITE.jpeg)
+![Route 53](docs/screenshots/ROUTE53.png)
 
 ---
 
-# 11. Application Through ALB
+# 22. HTTPS Configuration
 
-The website was tested through the Application Load Balancer to verify that traffic was reaching the application correctly.
+HTTPS was configured using AWS Certificate Manager and the Application Load Balancer.
+
+```text
+Route 53
+   |
+   v
+Application Load Balancer
+   |
+   v
+ACM Certificate
+   |
+   v
+HTTPS : 443
+```
 
 ### Screenshot
 
-![Website Through ALB](docs/screenshots/CHECKING_WEBSITE_THROUGH_ALB.jpeg)
+![HTTPS Configuration](docs/screenshots/HTTPS.png)
 
 ---
 
-# 12. User Account Creation
+# 23. Test Website Through ALB
 
-The registration functionality was tested by creating an account on the deployed application.
+After configuring the ALB and Target Group, the application was tested through the ALB DNS name.
+
+```text
+http://ALB-DNS-NAME
+```
 
 ### Screenshot
 
-![Created an Account](docs/screenshots/CREATED_AN_ACCOUNT.jpeg)
+![Website Through ALB](docs/screenshots/CHECKING_WEBSITE_THROUGH_ALB.png)
 
 ---
 
-# 13. Email OTP
+# 24. Access Website Through Domain
 
-The email OTP functionality was tested during the application flow.
+After configuring Route 53 and HTTPS, the application was accessed through the configured domain.
+
+```text
+https://your-domain.com
+```
 
 ### Screenshot
 
-![Getting OTP on Mail](docs/screenshots/GETTING_OTP_ON_MAIL.jpeg)
+![Website](docs/screenshots/WEBSITE.png)
 
 ---
 
-# 14. Product Added to Cart
+# 25. Create User Account
 
-The product/cart functionality was tested after deployment.
+The user registration functionality was tested by creating an account on the application.
 
 ### Screenshot
 
-![Product on Cart](docs/screenshots/PRODUCT_ON_CART.jpeg)
+![Account Created](docs/screenshots/CREATED_AN_ACCOUNT.png)
 
 ---
 
-# 15. Successful Order Email
+# 26. Test Application Functionality
 
-The successful order flow was tested and the corresponding email notification was verified.
+The deployed application was tested for its main functionality.
+
+Tests included:
+
+```text
+User Registration
+User Login
+Product Browsing
+Product Selection
+Cart Functionality
+Purchase Flow
+Database Updates
+```
 
 ### Screenshot
 
-![Order Successful Mail](docs/screenshots/ORDER_SUCCESSFULL_MAIL.jpeg)
+![Application Testing](docs/screenshots/APPLICATION_TESTING.png)
 
 ---
 
-# 16. Verify Database After Purchase
+# 27. Email OTP Functionality
 
-After completing a purchase through the website, the database was checked to verify that the application data was stored successfully in RDS MySQL.
+The email OTP functionality was tested as part of the application authentication/verification flow.
+
+### Screenshot
+
+![Email OTP](docs/screenshots/GETTING_OTP_ON_MAIL.png)
+
+---
+
+# 28. Verify Data in RDS
+
+After performing an operation such as purchasing an item from the website, the RDS MySQL database was checked to verify that the application data was stored successfully.
 
 ```text
 Website
@@ -267,53 +553,53 @@ Website
 Backend API
    |
    v
-Amazon RDS MySQL
+RDS MySQL
    |
    v
-Order / Application Data
+Data Stored
 ```
 
 ### Screenshot
 
-![Checking Database After Buying](docs/screenshots/CHECKING_DATABASES_AFTER_BUYING_ON_WEBSITE.jpeg)
+![Checking Database After Buying](docs/screenshots/CHECKING_DATABASE_AFTER_BUYING_ON_WEBSITE.png)
 
 ---
 
-# 17. Security
+# Security
 
-The project uses AWS security controls such as:
+The project uses AWS security controls including:
 
 - Security Groups
-- Controlled inbound and outbound traffic
+- Private database connectivity
 - HTTPS
-- AWS Certificate Manager
-- Route 53
+- ACM SSL/TLS certificate
+- Controlled application ports
+- Route 53 DNS
 - RDS MySQL
-- Separate application/database access
 
-Sensitive information such as passwords, private keys, database credentials, and secrets are not included in this repository.
+Sensitive information such as passwords, private keys, database credentials, and other secrets are not stored in this repository.
 
 ---
 
-# 18. Testing Performed
+# Testing Checklist
 
-The deployed application was tested for:
-
-- EC2 server availability
+- EC2 connectivity
+- Nginx service
 - Frontend server
 - Backend server
 - API response
-- RDS database
-- Target Group
-- Application Load Balancer
-- HTTPS
-- Route 53 DNS
+- RDS connectivity
+- MySQL database operations
+- ALB routing
+- Target Group health
+- Route 53 DNS resolution
+- HTTPS access
 - User registration
-- Email OTP
-- Product/cart functionality
-- Order flow
+- Login functionality
+- Product functionality
+- Purchase functionality
 - Database updates
-- Order email notification
+- Email OTP functionality
 
 ---
 
@@ -325,11 +611,10 @@ The deployed application was tested for:
 | Compute | Amazon EC2 |
 | Database | Amazon RDS MySQL |
 | Load Balancing | Application Load Balancer |
-| Target Routing | Target Groups |
 | DNS | Amazon Route 53 |
 | SSL/TLS | AWS Certificate Manager |
 | Web Server | Nginx |
-| Networking | Amazon VPC |
+| Networking | VPC, Subnets, Route Tables, Internet Gateway |
 | Security | Security Groups |
 | Backend | Node.js |
 | Database | MySQL |
@@ -343,19 +628,21 @@ The deployed application was tested for:
 Through this project, I gained hands-on experience with:
 
 - Deploying applications on Amazon EC2
-- Working with AWS networking
-- Configuring application servers
+- Creating and configuring AWS VPC networking
+- Working with public and private subnets
+- Configuring Security Groups
 - Installing and configuring Nginx
 - Deploying frontend and backend applications
-- Creating Amazon RDS MySQL
+- Creating and configuring Amazon RDS MySQL
 - Connecting an application to RDS
+- Creating Application Load Balancers
 - Configuring Target Groups
-- Configuring an Application Load Balancer
-- Setting up HTTPS using ACM
 - Configuring Route 53
-- Testing application functionality
-- Verifying application data in RDS
-- Troubleshooting AWS application connectivity
+- Creating SSL certificates using ACM
+- Configuring HTTPS
+- Troubleshooting application connectivity
+- Verifying application data inside RDS
+- Understanding how multiple AWS services work together in a real deployment
 
 ---
 
@@ -363,26 +650,41 @@ Through this project, I gained hands-on experience with:
 
 ```text
 AWS_PROJECT_FLIPKART_APPLICATION_WITH_RDS/
-│
-├── README.md
-│
-└── docs/
-    └── screenshots/
-        ├── API_RUNNING_SUCCESFULLY_MESSAGE.jpeg
-        ├── BACKEND_SERVER_RUNNING.jpeg
-        ├── CHECKING_DATABASES_AFTER_BUYING_ON_WEBSITE.jpeg
-        ├── CHECKING_WEBSITE_THROUGH_ALB.jpeg
-        ├── CREATED_AN_ACCOUNT.jpeg
-        ├── DATABASE.jpeg
-        ├── DB-SUBNET-GROUP.jpeg
-        ├── EC2_SERVERS.jpeg
-        ├── FRONTEND_SERVER_RUNNING.jpeg
-        ├── GETTING_OTP_ON_MAIL.jpeg
-        ├── ORDER_SUCCESSFULL_MAIL.jpeg
-        ├── PRODUCT_ON_CART.jpeg
-        ├── ROUTE53_WEBSITE.jpeg
-        ├── TARGET_GROUP.jpeg
-        └── UPDATED_ALB_WITH_HTTPS.jpeg
+|
++-- README.md
+|
++-- docs/
+    |
+    +-- screenshots/
+        |
+        +-- VPC.png
+        +-- SUBNETS.png
+        +-- INTERNET_GATEWAY.png
+        +-- ROUTE_TABLE.png
+        +-- SECURITY_GROUPS.png
+        +-- EC2_SERVERS.png
+        +-- EC2_CONNECTION.png
+        +-- NODE_INSTALLATION.png
+        +-- NGINX_RUNNING.png
+        +-- FRONTEND_SERVER_RUNNING.png
+        +-- BACKEND_SERVER_RUNNING.png
+        +-- API_RUNNING_SUCCESFULLY_MESSAGE.png
+        +-- DATABASE.png
+        +-- DB-SUBNET-GROUP.png
+        +-- RDS_SECURITY_GROUP.png
+        +-- DATABASE_CONNECTION.png
+        +-- ALB.png
+        +-- TARGET_GROUP.png
+        +-- ALB_LISTENER.png
+        +-- ACM_CERTIFICATE.png
+        +-- ROUTE53.png
+        +-- HTTPS.png
+        +-- CHECKING_WEBSITE_THROUGH_ALB.png
+        +-- WEBSITE.png
+        +-- CREATED_AN_ACCOUNT.png
+        +-- APPLICATION_TESTING.png
+        +-- GETTING_OTP_ON_MAIL.png
+        +-- CHECKING_DATABASE_AFTER_BUYING_ON_WEBSITE.png
 ```
 
 ---
@@ -414,25 +716,29 @@ https://www.linkedin.com/in/ventrapragada-venkata-subbarao
 ## Project Summary
 
 ```text
-Amazon EC2
-     +
+AWS EC2
+    +
 Amazon RDS MySQL
-     +
+    +
 Application Load Balancer
-     +
+    +
 Target Groups
-     +
+    +
+VPC Networking
+    +
+Security Groups
+    +
 Nginx
-     +
+    +
 Route 53
-     +
+    +
 ACM
-     +
+    +
 HTTPS
-     +
+    +
 Linux
-     +
+    +
 Node.js
 ```
 
-A hands-on AWS deployment project demonstrating how multiple AWS services can work together to deploy, expose, secure, and test an e-commerce application.
+A complete hands-on AWS deployment project demonstrating how multiple AWS services can be integrated to deploy, secure, expose, and test an e-commerce application.
