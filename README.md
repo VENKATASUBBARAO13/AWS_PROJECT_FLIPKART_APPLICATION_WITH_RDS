@@ -11,41 +11,80 @@ A hands-on AWS deployment project for an e-commerce application using **Amazon E
 
 ## Project Flow
 
-```text
-                         Route 53
-                            |
-                            v
-                    +----------------+
-                    |   ALB HTTPS    |
-                    |    :443        |
-                    +--------+-------+
-                             |
-                       Target Group
-                             |
-                             v
-                    +----------------+
-                    | Frontend EC2   |
-                    | Nginx :80      |
-                    +--------+-------+
-                             |
-                       /api proxy
-                             |
-                             v
-                    +----------------+
-                    | Backend EC2    |
-                    | Flask :5000    |
-                    +--------+-------+
-                             |
-                             v
-                    +----------------+
-                    | Amazon RDS     |
-                    | MySQL :3306    |
-                    +----------------+
+## Project Architecture
 
-Email OTP / order notifications
-              |
-              v
-        Gmail SMTP / App Password
+```text
+                              INTERNET
+                                  |
+                                  v
+                         +----------------+
+                         |    Route 53    |
+                         |  Custom Domain |
+                         +-------+--------+
+                                 |
+                                 | HTTPS :443
+                                 v
+                    +------------------------+
+                    |   Application Load     |
+                    |       Balancer        |
+                    |      (ALB :443)       |
+                    |                        |
+                    |  ACM TLS Certificate  |
+                    +-----------+------------+
+                                |
+                                | HTTP :80
+                                v
+                    +------------------------+
+                    |      Target Group      |
+                    |   Frontend EC2 Target  |
+                    +-----------+------------+
+                                |
+                                v
+              +---------------------------------------+
+              |             FRONTEND EC2               |
+              |                                       |
+              |              Nginx :80                |
+              |                                       |
+              |        E-Commerce Frontend            |
+              +------------------+--------------------+
+                                 |
+                                 | /api
+                                 | Reverse Proxy
+                                 | HTTP :5000
+                                 v
+              +---------------------------------------+
+              |             BACKEND EC2                |
+              |                                       |
+              |              Flask :5000              |
+              |                                       |
+              |        REST API / Application Logic    |
+              +------------------+--------------------+
+                                 |
+                                 | MySQL :3306
+                                 | Private Connection
+                                 v
+              +---------------------------------------+
+              |              AMAZON RDS                |
+              |                                       |
+              |             MySQL :3306               |
+              |                                       |
+              |     Users / Products / Cart / Orders  |
+              +---------------------------------------+
+
+
+                              EMAIL
+                                |
+                                |
+                                v
+              +---------------------------------------+
+              |             GMAIL SMTP                |
+              |               :587                    |
+              |                                       |
+              |       Email OTP / Order Emails        |
+              +------------------^--------------------+
+                                 |
+                                 |
+                           Backend EC2
 ```
 
 ---
