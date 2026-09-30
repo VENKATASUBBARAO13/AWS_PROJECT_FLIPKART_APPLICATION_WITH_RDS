@@ -9,8 +9,6 @@ A hands-on AWS deployment project for an e-commerce application using **Amazon E
 
 ---
 
-## Project Flow
-
 ## Project Architecture
 
 ```text
