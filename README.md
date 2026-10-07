@@ -2,11 +2,6 @@
 
 A hands-on AWS deployment project for an e-commerce application using **Amazon EC2, Amazon RDS (MySQL), Nginx, Application Load Balancer (ALB), ACM, Route 53, Security Groups, Target Groups and email OTP functionality**.
 
-> **Learning/reference source:** The application code used for this project is based on the public repository:
-> https://github.com/CloudTechDevOps/aws-ecomerce-Application-Multiple-services
->
-> This repository is organized as a step-by-step deployment guide so that another learner can follow the setup, verify each stage, and compare the result with the screenshots.
-
 ---
 
 ## Project Architecture
@@ -1097,18 +1092,6 @@ Before using a similar architecture in production:
 - [x] Order tested
 - [x] Database order verification completed
 - [x] Order confirmation email verified
-
----
-
-# 35. Credits / Reference
-
-Application source/reference:
-
-**CloudTechDevOps – AWS eCommerce Application Multiple Services**
-
-https://github.com/CloudTechDevOps/aws-ecomerce-Application-Multiple-services
-
-This repository is intended as my **step-by-step deployment documentation and learning record** for the AWS project.
 
 ---
 
