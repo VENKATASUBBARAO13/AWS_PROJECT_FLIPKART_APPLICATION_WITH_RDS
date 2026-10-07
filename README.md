@@ -114,11 +114,7 @@ Before starting, make sure you have:
 
 # 2. Get the Application Code
 
-The reference application contains separate frontend and backend components.
-
-Reference repository:
-
-https://github.com/CloudTechDevOps/aws-ecomerce-Application-Multiple-services
+This repository contains the application deployment documentation and the configuration used for the AWS e-commerce deployment.
 
 The deployment flow used here is:
 
