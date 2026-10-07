@@ -112,11 +112,9 @@ Before starting, make sure you have:
 
 ---
 
-# 2. Get the Application Code
+# 2. Deployment Flow
 
-This repository contains the application deployment documentation and the configuration used for the AWS e-commerce deployment.
-
-The deployment flow used here is:
+The deployment flow used in this project is:
 
 1. Prepare the database.
 2. Launch backend EC2.
